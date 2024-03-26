@@ -165,13 +165,13 @@ logSomething "Starting script"
 logSomething "Gathering variables"
 
 $BaseVar = "BaseVar"
-$SiteServer = $TSEnv.Value("BDSiteServer")
-$SiteCode = $TSEnv.Value("BDSiteCode")
-$CollectionName = $TSEnv.Value("BDCollectionName")
-$SkipText = $TSEnv.Value("BDSkipText")
+$SiteServer = $TSEnv.Value("SiteServer")
+$SiteCode = $TSEnv.Value("SiteCode")
+$CollectionName = $TSEnv.Value("CollectionName")
+$SkipText = $TSEnv.Value("SkipText")
 # get credentials from TS variables:
-$SvcAccount = $TSEnv.Value("BDQueryAccount")
-$SvcAccountPassword = $TSEnv.Value("BDQueryPassword")
+$SvcAccount = $TSEnv.Value("QueryUser")
+$SvcAccountPassword = $TSEnv.Value("QueryPassword")
 $SvcAccountPassword = $SvcAccountPassword | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
 $Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $SvcAccount,$SvcAccountPassword
 
