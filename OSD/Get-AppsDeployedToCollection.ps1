@@ -32,7 +32,7 @@ function Get-DeployedApps{
 		#create a CimSession		
 		logSomething "Creating CimSession on $SiteServer for $($Credentials.UserName)"
 		$thisCimSession = New-CimSession -ComputerName $SiteServer -Credential $Credentials -ErrorAction Stop
-		logSomething "-- CimSession created: $($thisCimSession)"
+		#logSomething "-- CimSession created: $($thisCimSession)"
 		logSomething "Getting the deployed applications"
 		$query = "select * from SMS_ApplicationAssignment where CollectionName = '$CollectionName' and DesiredConfigType = 1"
 		$allDeployedApps = Get-CimInstance -CimSession $thisCimSession -namespace "root\sms\site_$SiteCode" -Query $query
