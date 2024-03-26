@@ -1,0 +1,65 @@
+<Window x:Class="XAMLGUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:XAMLGUI"
+        mc:Ignorable="d"
+        x:Name="MainWindow"
+        Title="MainWindow" Height="450" Width="450" WindowStartupLocation="CenterScreen">
+    <Grid x:Name="grdMain">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="25"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="tbText" Grid.Column="0" Grid.Row="0" Margin="5,5">Some Text:</TextBlock>
+            <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" Grid.ColumnSpan="2">
+                <TextBox x:Name="txtInput" Height="25" Width="150" Margin="5,0" IsEnabled="True" VerticalContentAlignment="Center"/>
+                <Button x:Name="btnGo" Height="25" Width="50" Content="Go" IsEnabled="True"/>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+            </Grid.RowDefinitions>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                <TextBlock Margin="5">Status:</TextBlock>
+                <TextBlock x:Name="tbStatus" Margin="5"></TextBlock>
+            </StackPanel>
+            <ListView x:Name="lstResults" Grid.Row="1" Margin="5,5" SelectionMode="Extended">
+            </ListView>
+        </Grid>
+        <Grid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnCancel" Grid.Column="1" Height="25" Width="50" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5"/>
+        </Grid>
+    </Grid>
+</Window>
