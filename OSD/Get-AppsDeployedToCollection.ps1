@@ -39,7 +39,7 @@ function Get-DeployedApps{
 		logSomething "-- Got $(($allDeployedApps | Measure-Object).count) applications"
 		if($allDeployedApps){
 			ForEach($app in $allDeployedApps){
-				logSomething "Processing $($app.ApplicationName)"
+				logSomething "Checking $($app.ApplicationName)"
 				$CI_UID = $app.AssignedCI_UniqueID
 				$CMApp = Get-CimInstance -CimSession $thisCimSession -namespace "root\sms\site_$SiteCode" -Class SMS_Application -Filter "CI_UniqueId='$($CI_UID)'"
 				$installableApp = Get-AppInstallabilityInTS -CimSession $thisCimSession -CMApp $CMApp -SkipText $SkipText
@@ -77,11 +77,11 @@ function Get-AppInstallabilityInTS{
 	[Parameter(Mandatory=$False)] [string]$SkipText
     )
 	try{
-		logSomething "Checking installability"
+		#logSomething "Checking installability"
 		# check for SkipText
 		if($SkipText){
 			if($CMApp.LocalizedDescription -match '$SkipText'){
-				logSomething "-- Skipped for matching our exclusion text"
+				logSomething "-- WARNING: Skipped for matching our exclusion text"
 				return $null
 			}
 		}
@@ -90,7 +90,7 @@ function Get-AppInstallabilityInTS{
 		if(([xml]$CMApp.SDMPackageXML).AppMgmtDigest.Application.AutoInstall -eq "true"){
 			# check if Expired
 			if($CMApp.IsExpired -eq $false){
-				logSomething "-- PASS"
+				#logSomething "-- PASS"
 				return $CMApp
 			}
 			else{
@@ -155,7 +155,7 @@ Try{
 }
 Catch{
 	# no TS env... bail
-	environment::Exit[1]
+	[Environment]::Exit(1)
 }
 
 # setup the log file:
@@ -166,14 +166,25 @@ logSomething "Gathering variables"
 
 $BaseVar = "BaseVar"
 $SiteServer = $TSEnv.Value("SiteServer")
+logSomething "SiteServer: $SiteServer"
 $SiteCode = $TSEnv.Value("SiteCode")
+logSomething "SiteCode: $SiteCode"
 $CollectionName = $TSEnv.Value("CollectionName")
+logSomething "CollectionName: $CollectionName"
 $SkipText = $TSEnv.Value("SkipText")
+if($SkipText){logSomething "SkipText: $SkipText"}
 # get credentials from TS variables:
-$SvcAccount = $TSEnv.Value("QueryUser")
-$SvcAccountPassword = $TSEnv.Value("QueryPassword")
-$SvcAccountPassword = $SvcAccountPassword | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
-$Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $SvcAccount,$SvcAccountPassword
+$QueryUser = $TSEnv.Value("QueryUser")
+logSomething "QueryUser: $CollectionName"
+$QueryPassword = $TSEnv.Value("QueryPassword")
+logSomething "QueryPassword: *****"
+$QueryPassword = $QueryPassword | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
+$Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $QueryUser,$QueryPassword
+
+if(!$SiteServer -or !$SiteCode -or !$CollectionName -or !$QueryUser -or !$QueryPassword){
+	logSomething "FAIL: Missing TS variable... Check up above."
+	[Environment]::Exit(1)
+}
 
 # clear existing $baseVar
 Clear-AppBaseVar -baseVar $baseVar
