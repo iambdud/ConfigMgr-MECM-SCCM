@@ -58,11 +58,13 @@
             </ListView>
         </Grid>
         <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <Button x:Name="btnBack" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,0,5" Content="Back" IsEnabled="False"/>
+            <Button x:Name="btnNext" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,0,5" Content="Next" IsEnabled="False"/>
             <Button x:Name="btnCancel" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" Content="Cancel" IsEnabled="True"/>
         </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" >
-            <Button x:Name="btnBack" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,0,5" Content="Back" IsEnabled="False"/>
-            <Button x:Name="btnNext" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" Content="Next" IsEnabled="False"/>
+        <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" >
+            <Button x:Name="btnAll" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,0,5" Content="All" IsEnabled="False"/>
+            <Button x:Name="btnNone" Height="25" Width="50" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,0,5" Content="None" IsEnabled="False"/>
         </StackPanel>
     </Grid>
 </Window>
