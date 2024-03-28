@@ -316,6 +316,8 @@ function Invoke-AppLookup{
 					$syncHash.btnNext.Content = "Done"
 					$syncHash.btnNext.IsEnabled = $true
 					$syncHash.btnBack.IsEnabled = $true
+					$syncHash.btnAll.IsEnabled = $true
+					$syncHash.btnNone.IsEnabled = $true
 					$syncHash.lstResults.Focus()
 					$syncHash.lstResults.SelectAll()
 				})
@@ -327,6 +329,8 @@ function Invoke-AppLookup{
 					$syncHash.btnNext.Content = "Next"
 					$syncHash.btnNext.IsEnabled = $true
 					$syncHash.btnBack.IsEnabled = $true
+					$syncHash.btnAll.IsEnabled = $false
+					$syncHash.btnNone.IsEnabled = $false
 					$syncHash.lstDevices.IsEnabled = $true
 					$syncHash.chkManual.IsEnabled = $true
 				})
@@ -340,6 +344,8 @@ function Invoke-AppLookup{
 					$syncHash.btnNext.Content = "Next"
 					$syncHash.btnNext.IsEnabled = $true
 					$syncHash.btnBack.IsEnabled = $false
+					$syncHash.btnAll.IsEnabled = $false
+					$syncHash.btnNone.IsEnabled = $false
 					$syncHash.lstDevices.IsEnabled = $true
 					$syncHash.txtComp.IsEnabled = $true
 					$syncHash.txtComp.Focus()
@@ -453,8 +459,11 @@ $btnBack.add_Click({
 	$txtComp.IsEnabled = $true
 	$btnNext.IsEnabled = $true
 	$btnBack.IsEnabled = $false
+	$btnAll.IsEnabled = $false
+	$btnNone.IsEnabled = $false
 	$lstResults.Items.Clear()
 	$btnNext.Content = "Next"
+	$tbStatus.Text = "Resetting..."
 	# if we hid the dropdown because no devices, don't unhide it
 	if($syncHash.NoDevices){
 
@@ -463,6 +472,16 @@ $btnBack.add_Click({
 		$lstDevices.IsEnabled = $true
 		$chkManual.IsEnabled = $true
 	}
+})
+
+$btnAll.add_Click({
+	$lstResults.SelectAll()
+	$lstResults.Focus()
+})
+
+$btnNone.add_Click({
+	$lstResults.UnSelectAll()
+	$lstResults.Focus()
 })
 
 $txtComp.Add_KeyUp({
@@ -501,7 +520,16 @@ $chkManual.add_UnChecked({
 
 # click cancel to close:
 $btnCancel.add_Click({
-    $xamGUI.Close() | out-null
+	$result = [System.Windows.Forms.MessageBox]::Show(
+        "Are you sure you want to cancel?",
+        "Confirmation",
+        [System.Windows.Forms.MessageBoxButtons]::YesNo,
+        [System.Windows.Forms.MessageBoxIcon]::Question
+    )
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
+		$xamGUI.Close() | out-null
+    }
 })
 
 #Launch the window
