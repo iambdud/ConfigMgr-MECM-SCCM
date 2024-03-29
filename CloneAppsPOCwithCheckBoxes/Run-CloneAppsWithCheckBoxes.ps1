@@ -336,10 +336,11 @@ function Invoke-AppLookup{
 				$syncHash.Window.Dispatcher.invoke([action]{
 					$syncHash.btnNext.Content = "Next"
 					$syncHash.btnNext.IsEnabled = $true
-					$syncHash.btnBack.IsEnabled = $true
 					$syncHash.btnAll.IsEnabled = $false
 					$syncHash.btnNone.IsEnabled = $false
 					$syncHash.chkManual.IsEnabled = $true
+					$syncHash.lstDevices.IsEnabled = $true
+					$syncHash.txtComp.IsEnabled = $true
 					$syncHash.grdCheckBoxContainer.IsEnabled = $false
 				})
 			}
