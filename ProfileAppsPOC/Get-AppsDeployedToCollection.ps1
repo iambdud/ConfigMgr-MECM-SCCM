@@ -175,7 +175,7 @@ $SkipText = $TSEnv.Value("SkipText")
 if($SkipText){logSomething "SkipText: $SkipText"}
 # get credentials from TS variables:
 $QueryUser = $TSEnv.Value("QueryUser")
-logSomething "QueryUser: $CollectionName"
+logSomething "QueryUser: $QueryUser"
 $QueryPassword = $TSEnv.Value("QueryPassword")
 logSomething "QueryPassword: *****"
 $QueryPassword = $QueryPassword | ConvertTo-SecureString -AsPlainText -Force -ErrorAction SilentlyContinue
