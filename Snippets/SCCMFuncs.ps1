@@ -32,8 +32,9 @@ function Get-InstalledAppsForMachine {
 				CimSession = $thisCimSession
 				NameSpace = "root\sms\site_$SiteCode"
 				Class = "SMS_AppDeploymentAssetDetails"
-				Filter = "machineID = '$resID' and (DeploymentIntent = '2' and AppStatusType = '1' and not InstalledState = '1')"
+				#Filter = "machineID = '$resID' and (DeploymentIntent = '2' and AppStatusType = '1' and not InstalledState = '1')"
 				#Filter = "MachineName = '$Device' and (DeploymentIntent = '2' and AppStatusType = '1' and not InstalledState = '1')"
+				Filter = "MachineID = '$resID' and ((EnforcementState = 1000 or EnforcementState = '1001') and InstalledState <> 1)"
 			}
 			$InstalledApps = Get-CimInstance @query
 			return $InstalledApps
