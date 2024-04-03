@@ -1,16 +1,10 @@
 # PowerShell GUI app to get a list of applications installed (according to SCCM) on a specified device and add each application to a BaseVar for installationg during a task sequence
 # populate listbox with "installable" applications OR better if i can do a bunch of checkboxes (unchecked and grayed out if not "installable" with tooltip showing why? or hideable list of apps that are not "installable" with button to show/hide?)
 
-Set-Location $PSScriptRoot
-[IO.Directory]::SetCurrentDirectory($PSScriptRoot)
-
 #region load xaml
 #Add WPF and Windows Forms assemblies
 try{
 	Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,system.windows.forms
-	[Reflection.Assembly]::LoadFrom("$($PSScriptRoot)\assemblies\System.ValueTuple.dll") | Out-Null
-	[reflection.Assembly]::LoadFrom("$($PSScriptRoot)\assemblies\ModernWpf.dll") | Out-Null
-	[reflection.Assembly]::LoadFrom("$($PSScriptRoot)\assemblies\ModernWpf.Controls.dll") | Out-Null
 }
 catch{
 	Throw "Failed to load Windows Presentation Framework assemblies."
@@ -62,6 +56,7 @@ Function logSomething {
 Try{
 	$TSEnv = New-Object -ComObject Microsoft.SMS.TSEnvironment
 	$SMSTSLog = $TSEnv.value("_SMSTSLogPath")
+	$SiteServer = $TSEnv.value
 }
 Catch{}
 
@@ -99,8 +94,6 @@ else{
 	$syncHash.Namespace = "Root\SMS\Site_$($syncHash.SiteCode)"
 	$syncHash.SkipText = "NO_CLONE"
 }
-
-$MainWindow.DataContext = $syncHash
 
 logSomething "SiteServer: $($syncHash.SiteServer)"
 logSomething "SiteCode: $($syncHash.SiteCode)"
@@ -195,6 +188,7 @@ function Invoke-Initialize{
 					$syncHash.txtComp.Focus()
 					$syncHash.btnNext.IsEnabled = $true
 				})
+
 			}
 		}
 		catch{
@@ -221,6 +215,7 @@ function Invoke-AppLookup{
 	$Runspace.SessionStateProxy.SetVariable("srcCompName",$txtComp.Text)
 	$Runspace.SessionStateProxy.SetVariable("srcCompFromList",$lstDevices.SelectedItem)
 
+
 	$code = {
 		Function logSomething {
 			param(
@@ -235,15 +230,8 @@ function Invoke-AppLookup{
 			}
 			Catch{}
 		}
-		function AddCheckBox{
-			param($appName)
-			$checkBox = New-Object System.Windows.Controls.CheckBox
-			$checkBox.Content = $thisApp.LocalizedDisplayName
-			$checkBox.Margin = New-Object System.Windows.Thickness(5,0,15,0)  # Set margin
-			$checkBox.IsChecked = $true
-			$syncHash.CheckboxContainer.Children.Add($checkBox)
-		}
 		# if $syncHash.chkManual.IsChecked, lookup resource id
+		logSomething "$($chkManual)"
 		if($chkManual){
 			logSomething "Beginning application lookup for $srcCompName" -updateUI
 			logSomething "Getting ResourceId"
@@ -269,8 +257,8 @@ function Invoke-AppLookup{
 			$count = 1
 			if($InstalledApps){
 				# remove "excluded" apps
-				$matchedExcludedApps = $installedApps | Where-Object AppName -In $syncHash.excludedApps | Sort-Object -Property AppName
-				$installedApps = $installedApps | Where-Object AppName -NotIn $syncHash.excludedApps | Sort-Object -Property AppName
+				$matchedExcludedApps = $installedApps | Where AppName -In $syncHash.excludedApps | Sort-Object -Property AppName
+				$installedApps = $installedApps | Where AppName -NotIn $syncHash.excludedApps | Sort-Object -Property AppName
 				if($matchedExcludedApps){
 					logSomething "The following apps were found but match our exclusion rule:"
 					foreach($MEA in $matchedExcludedApps){
@@ -291,9 +279,7 @@ function Invoke-AppLookup{
 							# check if Expired
 							if($thisApp.IsExpired -eq $false){
 								logSomething "-- Added"
-								$syncHash.Window.Dispatcher.invoke([action]{
-									AddCheckBox $thisApp.LocalizedDisplayName
-								})
+								$syncHash.Window.Dispatcher.invoke([action]{$syncHash.lstResults.Items.Add($thisApp.LocalizedDisplayName)})
 								$count++
 							}
 							else{
@@ -321,19 +307,19 @@ function Invoke-AppLookup{
 						logSomething "$($count - 1) app(s) found. Be sure the select 99 or fewer applications" -updateUI
 					}
 					Else{
-						logSomething "$($count - 1) app(s) found. Select applications and click Done." -updateUI
+						logSomething "Application lookup complete. Select applications and click Done." -updateUI
 					}
 					
 				}
 				# enable buttons and focus list
 				$syncHash.Window.Dispatcher.invoke([action]{
-					#$syncHash.MainWindow.DataContext = $syncHash
 					$syncHash.btnNext.Content = "Done"
 					$syncHash.btnNext.IsEnabled = $true
 					$syncHash.btnBack.IsEnabled = $true
 					$syncHash.btnAll.IsEnabled = $true
 					$syncHash.btnNone.IsEnabled = $true
-					$syncHash.grdCheckBoxContainer.IsEnabled = $true
+					$syncHash.lstResults.Focus()
+					$syncHash.lstResults.SelectAll()
 				})
 			}
 			# no apps found
@@ -342,12 +328,11 @@ function Invoke-AppLookup{
 				$syncHash.Window.Dispatcher.invoke([action]{
 					$syncHash.btnNext.Content = "Next"
 					$syncHash.btnNext.IsEnabled = $true
+					$syncHash.btnBack.IsEnabled = $true
 					$syncHash.btnAll.IsEnabled = $false
 					$syncHash.btnNone.IsEnabled = $false
-					$syncHash.chkManual.IsEnabled = $true
 					$syncHash.lstDevices.IsEnabled = $true
-					$syncHash.txtComp.IsEnabled = $true
-					$syncHash.grdCheckBoxContainer.IsEnabled = $false
+					$syncHash.chkManual.IsEnabled = $true
 				})
 			}
 			
@@ -363,7 +348,6 @@ function Invoke-AppLookup{
 					$syncHash.btnNone.IsEnabled = $false
 					$syncHash.lstDevices.IsEnabled = $true
 					$syncHash.txtComp.IsEnabled = $true
-					$syncHash.grdCheckBoxContainer.IsEnabled = $false
 					$syncHash.txtComp.Focus()
 					if(!$syncHash.NoDevices){
 						$syncHash.chkManual.IsEnabled = $true
@@ -377,14 +361,14 @@ function Invoke-AppLookup{
 }
 
 function Invoke-BuildBaseVariable{
-	param($syncHash,$SelectedApps)
+	param($syncHash)
 	$Runspace = [runspacefactory]::CreateRunspace()
 	$Runspace.ApartmentState = "STA"
 	$Runspace.ThreadOptions = "ReuseThread"
 	$Runspace.Open()
 	$Runspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
 	$Runspace.SessionStateProxy.SetVariable("logFile",$LogFile)
-	$Runspace.SessionStateProxy.SetVariable("selectedApps",$selectedApps)
+	$Runspace.SessionStateProxy.SetVariable("lstResults",$lstResults.SelectedItems)
 	$Runspace.SessionStateProxy.SetVariable("TSEnv",$TSEnv)
 
 	$code = {
@@ -402,26 +386,31 @@ function Invoke-BuildBaseVariable{
 			Catch{}
 		}
 		$count = 1
-		logSomething "Finalizing..." -updateUI
-		logSomething "Adding variables for $($selectedApps.Count) apps"
-		if($selectedApps.Count -gt 99){
-			logSomething "Warning... more than 99 apps were selected. We will stop at 99. Anything after that will not be installed..."
-		}
-		foreach($sApp in $selectedApps){
-			if($count -gt 99){
-				logSomething "Warning: $sApp : skipped (max of 99 applications reached)" -updateUI
-				continue
+		if($lstResults.Count -gt 0){
+			logSomething "Finalizing..." -updateUI
+			logSomething "Adding variables for $($lstResults.Count) apps"
+			if($lstResults.Count -gt 99){
+				logSomething "Warning... more than 99 apps were selected. We will stop at 99. Anything after that will not be installed..."
 			}
-			$fNum = "{0:D2}" -f [int]$count
-			$TSVariableName = $syncHash.BaseVar + $fNum
-			logSomething "Adding: $TSVariableName :  $sApp" -updateUI
-			if($TSEnv){
-				$tsenv.Value($TSVariableName) = $sApp
+			foreach($sApp in $lstResults){
+				if($count -gt 99){
+					logSomething "Warning: $sApp : skipped (max of 99 applications reached)" -updateUI
+					continue
+				}
+				$fNum = "{0:D2}" -f [int]$count
+				$TSVariableName = $syncHash.BaseVar + $fNum
+				logSomething "Adding: $TSVariableName :  $sApp" -updateUI
+				if($TSEnv){
+					$tsenv.Value($TSVariableName) = $sApp
+				}
+				$count++
 			}
-			$count++
+			logSomething "Done" -updateUI
+			[Environment]::Exit(0)
 		}
-		logSomething "Done" -updateUI
-		[Environment]::Exit(0)
+		else{
+			logSomething "No applications selected" -updateUI
+		}
 		$Runspace.Close()
 		$Runspace.Dispose()
 	}
@@ -444,7 +433,6 @@ $btnNext.add_Click({
 		$lstDevices.IsEnabled = $false
 		$chkManual.IsEnabled = $false
 		$txtComp.IsEnabled = $false
-		$grdCheckBoxContainer.IsEnabled = $false
 		if($chkManual.IsChecked){
 			if($txtComp.Text -ne ""){
 				Invoke-AppLookup -syncHash $syncHash
@@ -455,7 +443,6 @@ $btnNext.add_Click({
 				$lstDevices.IsEnabled = $true
 				$chkManual.IsEnabled = $true
 				$txtComp.IsEnabled = $true
-				$grdCheckBoxContainer.IsEnabled = $true
 			}
 		}
 		else{
@@ -464,27 +451,7 @@ $btnNext.add_Click({
 	}
 	else{
 		# add to TS var and close
-		$selectedApps = @()
-		foreach ($checkBox in $CheckboxContainer.Children) {
-			if ($checkBox.IsChecked) {
-				$selectedApps += $checkBox.Content
-			}
-		}
-		if($selectedApps.Count -gt 0){
-			$btnNext.IsEnabled = $false
-			$btnBack.IsEnabled = $false
-			$btnAll.IsEnabled = $false
-			$btnNone.IsEnabled = $false
-			$lstDevices.IsEnabled = $false
-			$chkManual.IsEnabled = $false
-			$txtComp.IsEnabled = $false
-			$grdCheckBoxContainer.IsEnabled = $false
-			Invoke-BuildBaseVariable -syncHash $syncHash -selectedApps $selectedApps
-		}
-		else{
-			logSomething "Please select at least 1 application." -updateUI
-		}
-			
+		Invoke-BuildBaseVariable -syncHash $syncHash
 	}
 })
 
@@ -494,7 +461,7 @@ $btnBack.add_Click({
 	$btnBack.IsEnabled = $false
 	$btnAll.IsEnabled = $false
 	$btnNone.IsEnabled = $false
-	$CheckboxContainer.Children.Clear()
+	$lstResults.Items.Clear()
 	$btnNext.Content = "Next"
 	$tbStatus.Text = "Resetting..."
 	# if we hid the dropdown because no devices, don't unhide it
@@ -508,15 +475,13 @@ $btnBack.add_Click({
 })
 
 $btnAll.add_Click({
-    foreach ($checkBox in $CheckboxContainer.Children) {
-		$checkBox.IsChecked = $true
-    }
+	$lstResults.SelectAll()
+	$lstResults.Focus()
 })
 
 $btnNone.add_Click({
-    foreach ($checkBox in $CheckboxContainer.Children) {
-		$checkBox.IsChecked = $false
-    }
+	$lstResults.UnSelectAll()
+	$lstResults.Focus()
 })
 
 $txtComp.Add_KeyUp({
@@ -524,8 +489,8 @@ $txtComp.Add_KeyUp({
         if($txtComp.Text -ne ""){
 			$txtComp.IsEnabled = $false
             $btnNext.IsEnabled = $false
+			$lstDevices.IsEnabled = $false
 			$chkManual.IsEnabled = $false
-			$grdCheckBoxContainer.IsEnabled = $false
 			Invoke-AppLookup -syncHash $syncHash
         }
 		else{
