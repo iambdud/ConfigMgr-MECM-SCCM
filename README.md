@@ -25,13 +25,20 @@ This method uses a script to query SCCM and get a list of applications that are 
 	 - CollectionName - The name of the collection for the "profile"
 	 - (Optional) SkipText - Text that can be used to "skip" an application from being installed during the TS
 		 - Simply add something like "SKIPPED" to the description of the application in SCCM
+     <img width="705" alt="Profile-Apps - Set Variables" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/32a55d19-ceec-40f1-8ca7-cc0d5119538f">
  - **Get Application List**
 	 - Use a "Run PowerShell Script" step
 	 - Copy/Paste the script into the editor
 	 - Depending on your settings, change the execution policy as needed
+    <img width="705" alt="Profile-Apps - Get Application List" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/3195ef1a-0dc6-43ca-9a19-cf22cd4fbf01">
+
  - **Install Applications**
 	 - Add a condition: Task Sequence Variable "BaseVar" exists
 	 - Install applications according to the BaseVar dynamic variable list
+    <img width="705" alt="Profile-Apps - Install Applications Properties" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/592fe55b-f545-4aa6-917b-9e4e528b822d">
+    <img width="512" alt="Profile-Apps - Install Applications Options" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/1a60b603-8f74-4a68-8c43-512c1b44f5c4">
+
+
 #### Script execution flow
 - Gather the variables from the TS variables
 - Query SCCM to get the list of applications deployed to the specified collection
@@ -91,19 +98,24 @@ This method uses a UI to choose applications to install. The UI allows the user 
 	 - CollectionName - The name of the collection for the "profile"
 	 - (Optional) SkipText - Text that can be used to "skip" an application from being installed during the TS
 		 - Simply add something like "SKIPPED" to the description of the application in SCCM
-		 
- - **Get Application List**
+	<img width="612" alt="CloneApps - Set Variables" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/63f54edf-cce0-479e-a3b6-7c3cc4849263">
+
+ - **Run CloneApps UI**
 	 - Use a "Run Command Line" step
 	 - Command line:
 		 ```bash
 		 ServiceUI.exe -process:explorer.exe %SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File Run-CloneApps.ps1
 		 ```
 	 - Choose the package that contains the script and other files
+    <img width="705" alt="Profile-Apps - Run Clone Apps UI" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/940aa167-cbd1-478e-88c5-61f1ed2cc836">
 	 
  - **Install Applications**
 	 - Add a condition: Task Sequence Variable "BaseVar" exists
 	 - Install applications according to the BaseVar dynamic variable list
-	 
+	<img width="705" alt="CloneApps - Install Applications Properties" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/f517c872-c220-499d-a3ed-78c9f67ec70d">
+	<img width="705" alt="CloneApps - Install Applications Options" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/793d53e0-551c-426c-ac33-00cfca04d00b">
+
+
 #### Script execution flow
 - Gather the variables from the TS variables
 - Present the UI to the user
