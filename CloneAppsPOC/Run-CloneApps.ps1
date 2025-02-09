@@ -179,7 +179,7 @@ function Invoke-Initialize{
 							$syncHash.chkManual.IsEnabled = $true
 							$syncHash.btnNext.IsEnabled = $true
 						})
-						logSomething "Select a device and click Next to being app lookup." -updateUI
+						logSomething "Select a device and click Next to begin app lookup." -updateUI
 					}
 				}
 			}
