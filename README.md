@@ -146,7 +146,7 @@ This method uses a UI to choose applications to install. The UI allows the user 
 
 #### Clone Apps UI:
 
-![image](https://github.com/user-attachments/assets/4bb99b73-b876-4259-8f5e-1176bc4ac043)
+<img width="359" alt="image" src="https://github.com/user-attachments/assets/4bb99b73-b876-4259-8f5e-1176bc4ac043">
 <img width="359" alt="image" src="https://github.com/iambdud/ConfigMgr-MECM-SCCM/assets/9096898/1fc2c0ea-81cb-47bf-a75b-8d2700685350">
 
 #### Install Applications:
